@@ -23,9 +23,9 @@ def nearest(lst, target, delta_t):
 
 def mid_near(lst, last, delta_t):
     near_list = []
-    for i in range(1, 100):
+    for i in range(1, len(lst)):
         f = lst[lst.index(last) - i]
-        if last - f > delta_t:
+        if last - f > delta_t or last == f:
             break
         near_list.append(lst.index(last) - i)
     return near_list
@@ -41,6 +41,7 @@ for line in nmea.readlines():
    
 RMC_time = []
 RMC_ang = []
+time_dict = {}
 for line in nmea_data:
     if line[0] == '$GNRMC' and float(line[1]) < 101903.00:
         if line[8] != '':
@@ -49,14 +50,18 @@ for line in nmea_data:
             RMC_time.append(float(line[1]))
             RMC_ang.append(float(line[8]))
         if line[8] == '':
-            near = nearest(RMC_time, float(line[1]), 10)
+            near = nearest(RMC_time, float(line[1]), 20)
+            if near != None:
+                print(line[1])
+                def_near = [RMC_ang[i] for i in mid_near(RMC_time, near, 4)]
+                print(def_near)
             #print(near, line[1])
             # for i in range(1, 6):
             #     corr.append(nmea_data[int(nmea_data.index(line) - i - 1)][8])
             #     print(nmea_data.index(line), line[8], last_ang)
 
 
-def_near = [RMC_ang[i] for i in mid_near(RMC_time, 101643.2, 5)]
-print(def_near)
+#def_near = [RMC_ang[i] for i in mid_near(RMC_time, 101643.2, 5)]
+#print(def_near)
 
      
