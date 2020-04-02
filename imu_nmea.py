@@ -46,8 +46,6 @@ def t_dict(nmea_file, near_time):
     for line in nmea_data:
         if line[0] == '$GNRMC' and float(line[1]) < 101903.00:
             if line[8] != '':
-                #RMC_time.append([nmea_data.index(line), float(line[1]),float(line[8])])
-                #RMC_time.append(int(nmea_data.index(line)))
                 RMC_time.append(float(line[1]))
                 RMC_ang.append(float(line[8]))
             if line[8] == '':
@@ -57,15 +55,13 @@ def t_dict(nmea_file, near_time):
                         log.clear()
                     log.append(line[1])
                     time_dict.update({near:tuple(log)})
-    return time_dict
+    return time_dict, RMC_time, RMC_ang
 
+time_dict, RMC_time, RMC_ang = t_dict('nmea.csv', 20)
 
-print(t_dict('nmea.csv', 15))                
-
-
-
-# def_near = [RMC_ang[i] for i in mid_near(RMC_time, 101643.2, 5)]
-# print(def_near)
+for key in time_dict.keys():
+    def_near = [RMC_ang[i] for i in mid_near(RMC_time, key, 1)]  #ЕСЛИ 360 то хз
+    print(np.max(def_near), np.min(def_near))
 
 
 
