@@ -36,9 +36,9 @@ def angle_control(data):
 
 def mid_near(lst, last, delta_t):
     near_list = []
-    for i in range(1, 100):
+    for i in range(1, 50):
         f = lst[lst.index(last) - i]
-        if last - f > delta_t:
+        if abs(last - f) > delta_t:
             break
         near_list.append(lst.index(last) - i)
     return near_list
