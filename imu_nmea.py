@@ -24,6 +24,16 @@ def nearest(lst, target, delta_t):
         return None
 
 
+def angle_control(data):
+    rad_data = []
+    for i in range(len(data)):           
+        if data[i] > 180 and data[i] < 360:
+            rad_data.append(data[i] - 360)
+        else:
+            rad_data.append(data[i])
+    return rad_data
+
+
 def mid_near(lst, last, delta_t):
     near_list = []
     for i in range(1, 100):
@@ -56,5 +66,3 @@ def t_dict(nmea_file, near_time):
                     log.append(line[1])
                     time_dict.update({near:tuple(log)})
     return time_dict, RMC_time, RMC_ang
-
-    
