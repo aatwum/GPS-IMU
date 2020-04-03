@@ -57,14 +57,4 @@ def t_dict(nmea_file, near_time):
                     time_dict.update({near:tuple(log)})
     return time_dict, RMC_time, RMC_ang
 
-time_dict, RMC_time, RMC_ang = t_dict('nmea.csv', 20)
-
-for key in time_dict.keys():
-    def_near = [RMC_ang[i] for i in mid_near(RMC_time, key, 1)]  #ЕСЛИ 360 то хз
-    print(np.max(def_near), np.min(def_near))
-
-
-
-x = (datetime.utcfromtimestamp(1582107260545/1000)).strftime('%H%M%S.%f')
-
-imu = pd.read_csv('imu.csv', sep =',', comment = '@',  usecols=['timestamp', 'orientation.x'])
+    
