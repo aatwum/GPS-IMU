@@ -15,8 +15,9 @@ def hhmmss_to_s(RMC_time):
 
 def nearest(lst, target, delta_t):
     if len(lst) != 0:
-        t = min(lst, key=lambda x: abs(hhmmss_to_s(x)-hhmmss_to_s(target)))
-        if abs(hhmmss_to_s(target) - hhmmss_to_s(t)) > delta_t:
+        target = hhmmss_to_s(target)
+        t = min(lst, key=lambda x: abs(hhmmss_to_s(x)-target))
+        if abs(target - hhmmss_to_s(t)) > delta_t:
             return None
         else:
             return t
@@ -54,7 +55,7 @@ def t_dict(nmea_file, near_time):
     time_dict = {}
     log = []
     for line in nmea_data:
-        if line[0] == '$GNRMC' and float(line[1]) < 101903.00:
+        if line[0] == '$GNRMC' and float(line[1]) < 101631.00:
             if line[8] != '':
                 RMC_time.append(float(line[1]))
                 RMC_ang.append(float(line[8]))
@@ -66,3 +67,4 @@ def t_dict(nmea_file, near_time):
                     log.append(line[1])
                     time_dict.update({near:tuple(log)})
     return time_dict, RMC_time, RMC_ang
+
