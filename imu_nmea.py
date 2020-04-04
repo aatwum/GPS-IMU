@@ -55,9 +55,8 @@ def median_value(value, time_data, ang_data, time):
 
 def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
 
-    File = nmea_file
-    base = os.path.splitext(File)[0]
-    os.rename(File, base + ".csv")
+    base = os.path.splitext(nmea_file)[0]
+    os.rename(nmea_file, base + ".csv")
    
     imu = pd.read_csv(imu_file, sep =',', comment = '@',  usecols=['timestamp', 'orientation.x'])
     imu_time, imu_ang = zip(*[[hhmmss_to_s(float(datetime.utcfromtimestamp(i[0]/1000).strftime('%H%M%S.%f'))), 
