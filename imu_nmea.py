@@ -67,6 +67,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     imu_time, imu_ang = zip(*[[hhmmss_to_s(float(datetime.utcfromtimestamp(i[0]/1000).strftime('%H%M%S.%f'))), 
                                                                 i[1]] for i in imu.values.tolist()])
     imu_time, imu_ang = list(imu_time), list(imu_ang)
+    print([hhmmss_to_s(n, versa=True) for n in imu_time])
     
     nmea = open(base + ".csv")
     nmea_data = []
@@ -78,7 +79,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     time_dict_2 = {}
     log = []
     for line in nmea_data:
-        if line[0] == '$GNRMC': #and float(line[1]) < 101631.00:
+        if line[0] == '$GPRMC':      # OR GNRMC !!
             line_1 = float(line[1])
             if line[8] != '':
                 line_8 = float(line[8])
