@@ -54,11 +54,17 @@ def median_value(value, time_data, ang_data, time):
 
 
 def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
+
+    File = nmea_file
+    base = os.path.splitext(File)[0]
+    os.rename(File, base + ".csv")
+   
     imu = pd.read_csv(imu_file, sep =',', comment = '@',  usecols=['timestamp', 'orientation.x'])
     imu_time, imu_ang = zip(*[[hhmmss_to_s(float(datetime.utcfromtimestamp(i[0]/1000).strftime('%H%M%S.%f'))), 
                                                                 i[1]] for i in imu.values.tolist()])
     imu_time, imu_ang = list(imu_time), list(imu_ang)
-    nmea = open(nmea_file)
+    
+    nmea = open(base + ".csv")
     nmea_data = []
     for line in nmea.readlines(): 
         nmea_data.append(line.split(','))   
@@ -94,6 +100,8 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
                             log.clear()
                     log.append(hhmmss_to_s(line_1))
                     time_dict.update({near:log})
-                    time_nmea = near
+                    time_nmea = near   
+    nmea.close()
+    os.rename(base + ".csv", base + ".NMEA")          
     return time_dict_2
 
