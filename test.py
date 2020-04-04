@@ -7,7 +7,6 @@ import numpy as np
 import os
 
 
-
 x = t_dict('nmea_1.NMEA', 'imu.csv', 15, 2, 1.2)
 print(x)
 

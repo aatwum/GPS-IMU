@@ -5,13 +5,18 @@ import numpy as np
 import os
 
 
-def hhmmss_to_s(RMC_time):
-    h = float(str(RMC_time)[0:2])
-    m = float(str(RMC_time)[2:4])
-    s = float(str(RMC_time)[4:])
-    sec = 3600*h + 60*m + s
-    return sec
-
+def hhmmss_to_s(RMC_time, versa=False):
+    if versa == False:
+        h = float(str(RMC_time)[0:2])
+        m = float(str(RMC_time)[2:4])
+        s = float(str(RMC_time)[4:])
+        sec = 3600*h + 60*m + s
+        return sec
+    if versa == True:   
+        h = int(RMC_time//3600)
+        m = int((RMC_time - 3600*h)//60)
+        s = float(RMC_time - h*3600 - m*60)
+        return round(float(str(h)+str(m)+str(s)), 2)
 
 def nearest(time_data, target, time):
     if len(time_data) != 0:
@@ -95,7 +100,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
                                     print('y = ', y)
                                     if y != None:
                                         new_ang = imu_ang[imu_time.index(y)] + delta
-                                        time_dict_2.update({n:new_ang})                        
+                                        time_dict_2.update({hhmmss_to_s(n, versa = True):new_ang})                        
                             log.clear()
                     log.append(hhmmss_to_s(line_1))
                     time_dict.update({near:log})
