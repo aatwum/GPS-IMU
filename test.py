@@ -7,10 +7,15 @@ import numpy as np
 import os
 
 
+time_new = t_dict('test/050420/test_2/nmea_moded_for_tests.NMEA', 
+                                                    'test/050420/test_2/imu_2.csv', 20, 0.2, 2)
+
+print(pd.DataFrame(time_new))                                                   
+
 #args: (nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
-dict_x, rmc_time, rmc_ang = t_dict('test/050420/test_2/nmea_moded_for_tests.NMEA', 
-                                                    'test/050420/test_2/imu_2.csv', 15, 0.4, 2)
-print(dict_x, '\n'*2, rmc_time, '\n'*2, rmc_ang)
+# dict_x, rmc_time, rmc_ang = t_dict('test/050420/test_2/nmea_moded_for_tests.NMEA', 
+#                                                     'test/050420/test_2/imu_2.csv', 15, 0.4, 2)
+# print(dict_x, '\n'*2, rmc_time, '\n'*2, rmc_ang)
 
 #x = datetime.utcfromtimestamp(1586083722144/1000).strftime('%H%M%S.%f')
 

@@ -76,7 +76,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     RMC_time = []
     RMC_ang = []
     time_dict = {}
-    time_dict_2 = {}
+    time_new = []
     log = []
     for line in nmea_data:
         if line[0] == '$GPRMC':      # OR GNRMC !!
@@ -101,7 +101,11 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
                                 print('y = ', hhmmss_to_s(y, versa = True))
                                 if y != None:
                                     new_ang = imu_ang[imu_time.index(y)] + delta
-                                    time_dict_2.update({hhmmss_to_s(n, versa = True):new_ang})                        
+                                    if new_ang > 360:
+                                        new_ang -= 360
+                                    elif new_ang < 0:
+                                        new_ang += 360
+                                    time_new.append([hhmmss_to_s(n, versa = True), new_ang])                        
                         print(log)
                         log.clear() 
                 if near != None:      
@@ -110,5 +114,5 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
                     time_nmea = near   
     nmea.close()
     os.rename(base + ".csv", base + ".NMEA")         
-    return time_dict_2, RMC_time, RMC_ang
+    return time_new #, RMC_time, RMC_ang
 
