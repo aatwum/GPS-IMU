@@ -63,11 +63,11 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     base = os.path.splitext(nmea_file)[0]
     os.rename(nmea_file, base + ".csv")
    
-    imu = pd.read_csv(imu_file, sep =',', comment = '@',  usecols=['timestamp', 'orientation.x'])
+    imu = pd.read_csv(imu_file, sep =',', comment = '@',  usecols=[0, 1])
     imu_time, imu_ang = zip(*[[hhmmss_to_s(float(datetime.utcfromtimestamp(i[0]/1000).strftime('%H%M%S.%f'))), 
                                                                 i[1]] for i in imu.values.tolist()])
     imu_time, imu_ang = list(imu_time), list(imu_ang)
-    print([hhmmss_to_s(n, versa=True) for n in imu_time])
+    #print([hhmmss_to_s(n, versa=True) for n in imu_time])
     
     nmea = open(base + ".csv")
     nmea_data = []
@@ -80,33 +80,35 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     log = []
     for line in nmea_data:
         if line[0] == '$GPRMC':      # OR GNRMC !!
+            print(line[0], line[1], line[8])
             line_1 = float(line[1])
-            if line[8] != '':
+            if line[8] != '' and float(line[8]) != 0:
                 line_8 = float(line[8])
                 RMC_time.append(hhmmss_to_s(line_1))
                 RMC_ang.append(line_8)
-            if line[8] == '':
-                near = nearest(RMC_time, hhmmss_to_s(line_1), near_time_NMEA)    #15
-                if near != None:       
-                    if time_dict.get(near) == None:  #?
-                        if len(time_dict) != 0:
-                            x = nearest(imu_time, time_nmea, near_time_IMU)
-                            print('x = ', x)
-                            if x != None:
-                                ang_nmea = median_value(time_nmea, RMC_time, RMC_ang, median_time)  #1.2
-                                ang_imu = imu_ang[imu_time.index(x)] #0.2
-                                delta = ang_nmea - ang_imu
-                                for n in log:
-                                    y = nearest(imu_time, n, near_time_IMU)
-                                    print('y = ', y)
-                                    if y != None:
-                                        new_ang = imu_ang[imu_time.index(y)] + delta
-                                        time_dict_2.update({hhmmss_to_s(n, versa = True):new_ang})                        
-                            log.clear()
+            if line[8] == '' or float(line[8]) == 0:
+                near = nearest(RMC_time, hhmmss_to_s(line_1), near_time_NMEA)    #15       
+                if time_dict.get(near) == None:  #Fill last NaNs
+                    if len(time_dict) != 0:
+                        x = nearest(imu_time, time_nmea, near_time_IMU)
+                        print('x = ', hhmmss_to_s(x, versa = True))
+                        if x != None:
+                            ang_nmea = median_value(time_nmea, RMC_time, RMC_ang, median_time)  #1.2
+                            ang_imu = imu_ang[imu_time.index(x)] #0.2
+                            delta = ang_nmea - ang_imu
+                            for n in log:
+                                y = nearest(imu_time, n, near_time_IMU)
+                                print('y = ', hhmmss_to_s(y, versa = True))
+                                if y != None:
+                                    new_ang = imu_ang[imu_time.index(y)] + delta
+                                    time_dict_2.update({hhmmss_to_s(n, versa = True):new_ang})                        
+                        print(log)
+                        log.clear() 
+                if near != None:      
                     log.append(hhmmss_to_s(line_1))
-                    time_dict.update({near:log})
+                    time_dict.update({near:log}) 
                     time_nmea = near   
     nmea.close()
-    os.rename(base + ".csv", base + ".NMEA")          
-    return time_dict_2
+    os.rename(base + ".csv", base + ".NMEA")         
+    return time_dict_2, RMC_time, RMC_ang
 
