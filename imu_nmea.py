@@ -58,6 +58,29 @@ def median_value(value, time_data, ang_data, time):
         return med        
 
 
+def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea, 
+                                near_time_IMU, RMC_time, RMC_ang, median_time):
+    if len(time_dict) != 0:
+        x = nearest(imu_time, time_nmea, near_time_IMU)
+        print('x = ', hhmmss_to_s(x, versa = True))
+        if x != None:
+            ang_nmea = median_value(time_nmea, RMC_time, RMC_ang, median_time)  #1.2
+            ang_imu = imu_ang[imu_time.index(x)] #0.2
+            delta = ang_nmea - ang_imu
+            for n in log:
+                y = nearest(imu_time, n, near_time_IMU)
+                print('y = ', hhmmss_to_s(y, versa = True))
+                if y != None:
+                    new_ang = imu_ang[imu_time.index(y)] + delta
+                    if new_ang > 360:
+                        new_ang -= 360
+                    elif new_ang < 0:
+                        new_ang += 360
+                    time_new.append([hhmmss_to_s(n, versa = True), new_ang])
+        print(log)
+        log.clear()
+
+
 def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
 
     base = os.path.splitext(nmea_file)[0]
@@ -78,6 +101,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     time_dict = {}
     time_new = []
     log = []
+    time_nmea = None
     for line in nmea_data:
         if line[0] == '$GPRMC':      # OR GNRMC !!
             print(line[0], line[1], line[8])
@@ -89,29 +113,14 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
             if line[8] == '' or float(line[8]) == 0:
                 near = nearest(RMC_time, hhmmss_to_s(line_1), near_time_NMEA)    #15       
                 if time_dict.get(near) == None:  #Fill last NaNs
-                    if len(time_dict) != 0:
-                        x = nearest(imu_time, time_nmea, near_time_IMU)
-                        print('x = ', hhmmss_to_s(x, versa = True))
-                        if x != None:
-                            ang_nmea = median_value(time_nmea, RMC_time, RMC_ang, median_time)  #1.2
-                            ang_imu = imu_ang[imu_time.index(x)] #0.2
-                            delta = ang_nmea - ang_imu
-                            for n in log:
-                                y = nearest(imu_time, n, near_time_IMU)
-                                print('y = ', hhmmss_to_s(y, versa = True))
-                                if y != None:
-                                    new_ang = imu_ang[imu_time.index(y)] + delta
-                                    if new_ang > 360:
-                                        new_ang -= 360
-                                    elif new_ang < 0:
-                                        new_ang += 360
-                                    time_new.append([hhmmss_to_s(n, versa = True), new_ang])                        
-                        print(log)
-                        log.clear() 
+                    imu_fill(time_dict, imu_time, imu_ang, log, 
+                        time_new, time_nmea, near_time_IMU, RMC_time, RMC_ang, median_time)                       
                 if near != None:      
                     log.append(hhmmss_to_s(line_1))
                     time_dict.update({near:log}) 
-                    time_nmea = near   
+                    time_nmea = near
+    imu_fill(time_dict, imu_time, imu_ang, log, 
+                        time_new, time_nmea, near_time_IMU, RMC_time, RMC_ang, median_time)
     nmea.close()
     os.rename(base + ".csv", base + ".NMEA")         
     return time_new #, RMC_time, RMC_ang
