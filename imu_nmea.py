@@ -1,4 +1,5 @@
 from datetime import datetime
+import shutil
 import csv
 import pandas as pd 
 import numpy as np
@@ -85,11 +86,6 @@ def kill_dubs(nmea_file):
             nmea_double.append(x)
             nmea_edited.append(x)
     nmea.close()
-    #list_to_csv
-    with open(base, 'w', newline='') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        for item in nmea_edited:
-            csv_writer.writerow(item)
     return nmea_edited
 
 
@@ -127,10 +123,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     imu_time, imu_ang = list(imu_time), list(imu_ang)
     #print([hhmmss_to_s(n, versa=True) for n in imu_time])
     
-    nmea = open(base + ".csv")
-    nmea_data = []
-    for line in nmea.readlines(): 
-        nmea_data.append(line.split(','))   
+    nmea_data = kill_dubs(base + ".csv") 
     RMC_time = []
     RMC_ang = []
     time_dict = {}
@@ -138,7 +131,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     log = []
     time_nmea = None
     for line in nmea_data:
-        if line[0] == '$GPRMC':      # OR GNRMC !!
+        if line[0] == '$GPRMC' or line[0] == '$GNRMC':      # OR GNRMC !!
             print(line[0], line[1], line[8])
             line_1 = float(line[1])
             if line[8] != '' and float(line[8]) != 0:
@@ -157,7 +150,6 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     if len(log) > 0:
         imu_fill(time_dict, imu_time, imu_ang, log, 
                         time_new, time_nmea, near_time_IMU, RMC_time, RMC_ang, median_time)
-    nmea.close()
     os.rename(base + ".csv", base + ".NMEA")         
     return time_new #, RMC_time, RMC_ang
 
