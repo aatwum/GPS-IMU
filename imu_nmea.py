@@ -66,27 +66,25 @@ def kill_dubs(nmea_file):
     nmea_double = []
     nmea_edited = []
     number = 0
+    ed = 0
     for line in nmea.readlines(): 
         x = line.split(',')
-        print(x)
+        ed += 1
         if x[0] == '$GPRMC':
             if x[8] != '' and float(x[8]) != 0:
                 if number != 0 and x[8] == nmea_double[number][8]:
-                    nmea_double.append(x)
-                    x[8] = ''
-                    nmea_edited.append(x)
-                else:
-                    nmea_double.append(x)
-                    nmea_edited.append(x)
+                    nmea_edited.append(ed)
+                nmea_double.append(x)
                 number = nmea_double.index(x)
             else: 
                 nmea_double.append(x)
-                nmea_edited.append(x)
         else:
             nmea_double.append(x)
-            nmea_edited.append(x)
+    for line in nmea_double:
+        if int(nmea_double.index(line)+1) in nmea_edited:
+            line[8] = ''
     nmea.close()
-    return nmea_edited
+    return nmea_double
 
 
 def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea, 
