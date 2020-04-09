@@ -69,7 +69,8 @@ def kill_dubs(nmea_file):
     nmea_edited = []
     number = 0
     ed = 0
-    for line in nmea.readlines(): 
+    for line in nmea.readlines():
+        line = line.replace("\r", "").replace("\n", "")
         x = line.split(',')
         ed += 1
         if x[0] == '$GPRMC' or x[0] == '$GNRMC':
@@ -93,14 +94,14 @@ def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea,
                                 near_time_IMU, RMC_time, RMC_ang, median_time):
     if len(time_dict) != 0:
         x = nearest(imu_time, time_nmea, near_time_IMU)
-        print('x = ', hhmmss_to_s(x, versa = True))
+        #print('x = ', hhmmss_to_s(x, versa = True))
         if x != None:
             ang_nmea = median_value(time_nmea, RMC_time, RMC_ang, median_time)  #1.2
             ang_imu = imu_ang[imu_time.index(x)] #0.2
             delta = ang_nmea - ang_imu
             for n in log:
                 y = nearest(imu_time, n, near_time_IMU)
-                print('y = ', hhmmss_to_s(y, versa = True))
+                #print('y = ', hhmmss_to_s(y, versa = True))
                 if y != None:
                     new_ang = imu_ang[imu_time.index(y)] + delta
                     if new_ang > 360:
@@ -108,7 +109,7 @@ def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea,
                     elif new_ang < 0:
                         new_ang += 360
                     time_new.append([hhmmss_to_s(n, versa = True), new_ang])
-        print(log)
+        #print(log)
         log.clear()
 
 
@@ -121,7 +122,6 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     imu_time, imu_ang = zip(*[[hhmmss_to_s(float(datetime.utcfromtimestamp(i[0]/1000).strftime('%H%M%S.%f'))), 
                                                                 i[1]] for i in imu.values.tolist()])
     imu_time, imu_ang = list(imu_time), list(imu_ang)
-    #print([hhmmss_to_s(n, versa=True) for n in imu_time])
     
     nmea_data, base_1 = kill_dubs(base + ".csv") 
     RMC_time = []
@@ -131,9 +131,8 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     log = []
     time_nmea = None
     for line in nmea_data:
-       #count = nmea_data.index(line)
-        if line[0] == '$GPRMC' or line[0] == '$GNRMC':      # OR GNRMC !!
-            print(line[0], line[1], line[8])
+        if line[0] == '$GPRMC' or line[0] == '$GNRMC':     
+            #print(line[0], line[1], line[8])
             line_1 = float(line[1])
             if line[8] != '' and float(line[8]) != 0:
                 line_8 = float(line[8])
@@ -166,6 +165,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
         csv_writer = csv.writer(csv_file)
         for item in nmea_data:
             csv_writer.writerow(item)
+    csv_file.close()
 
-    return time_new #, RMC_time, RMC_ang
+    return time_new
 
