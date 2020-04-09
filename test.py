@@ -58,7 +58,7 @@ elif len(nmea_file) == len(imu_file) and len(nmea_file) != 0:
         pd.set_option("display.max_rows", None, "display.max_columns", None)
         print(pd.DataFrame(time_new)) 
 
-        if i < len(nmea_file):
+        if i + 1 < len(nmea_file):
             x = input('Нажмите любую клавишу для продолжения')
         else:
             x = input('Нажмите любую клавишу для завершения')
