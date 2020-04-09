@@ -62,7 +62,8 @@ def median_value(value, time_data, ang_data, time):
 
 
 def kill_dubs(nmea_file):
-    base = os.path.splitext(nmea_file)[0] + '_imu_edited' + '.csv'
+    base_1 = os.path.splitext(nmea_file)[0] + '_imu_edited'
+    base = base_1 + '.csv'
     shutil.copyfile(nmea_file, base)
     nmea = open(nmea_file, newline='')
     nmea_double = []
@@ -87,7 +88,7 @@ def kill_dubs(nmea_file):
         if int(nmea_double.index(line)+1) in nmea_edited:
             line[8] = ''
     nmea.close()
-    return nmea_double, base
+    return nmea_double, base_1
 
 
 def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea, 
@@ -161,11 +162,13 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
                 line[8] = round(imu_add_ang[imu_add_time.index(time)], 3)
 
 
-    with open(base_1, 'w', newline='') as csv_file:
+    with open(base_1 + ".csv", 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
         for item in nmea_data:
             csv_writer.writerow(item)
     csv_file.close()
+
+    os.rename(base_1 + ".csv", base_1 + ".NMEA")
 
     return time_new
 
