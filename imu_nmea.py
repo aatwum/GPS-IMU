@@ -17,6 +17,8 @@ def hhmmss_to_s(RMC_time, versa=False):
         h = int(RMC_time//3600)
         m = int((RMC_time - 3600*h)//60)
         s = float(RMC_time - h*3600 - m*60)
+        if s < 10:
+            s = str(0) + str(s)
         return round(float(str(h)+str(m)+str(s)), 2)
 
 def nearest(time_data, target, time):
@@ -70,7 +72,7 @@ def kill_dubs(nmea_file):
     for line in nmea.readlines(): 
         x = line.split(',')
         ed += 1
-        if x[0] == '$GPRMC':
+        if x[0] == '$GPRMC' or x[0] == '$GNRMC':
             if x[8] != '' and float(x[8]) != 0:
                 if number != 0 and x[8] == nmea_double[number][8]:
                     nmea_edited.append(ed)
@@ -84,7 +86,7 @@ def kill_dubs(nmea_file):
         if int(nmea_double.index(line)+1) in nmea_edited:
             line[8] = ''
     nmea.close()
-    return nmea_double
+    return nmea_double, base
 
 
 def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea, 
@@ -121,7 +123,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     imu_time, imu_ang = list(imu_time), list(imu_ang)
     #print([hhmmss_to_s(n, versa=True) for n in imu_time])
     
-    nmea_data = kill_dubs(base + ".csv") 
+    nmea_data, base_1 = kill_dubs(base + ".csv") 
     RMC_time = []
     RMC_ang = []
     time_dict = {}
@@ -129,6 +131,7 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     log = []
     time_nmea = None
     for line in nmea_data:
+       #count = nmea_data.index(line)
         if line[0] == '$GPRMC' or line[0] == '$GNRMC':      # OR GNRMC !!
             print(line[0], line[1], line[8])
             line_1 = float(line[1])
@@ -148,6 +151,21 @@ def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
     if len(log) > 0:
         imu_fill(time_dict, imu_time, imu_ang, log, 
                         time_new, time_nmea, near_time_IMU, RMC_time, RMC_ang, median_time)
-    os.rename(base + ".csv", base + ".NMEA")         
+    os.rename(base + ".csv", base + ".NMEA")
+
+    imu_add_time, imu_add_ang = zip(*time_new)
+
+    for line in nmea_data:
+        if line[0] == '$GPRMC' or line[0] == '$GNRMC':
+            time = float(line[1])
+            if time in imu_add_time:
+                line[8] = round(imu_add_ang[imu_add_time.index(time)], 3)
+
+
+    with open(base_1, 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        for item in nmea_data:
+            csv_writer.writerow(item)
+
     return time_new #, RMC_time, RMC_ang
 
