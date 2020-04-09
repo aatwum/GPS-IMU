@@ -114,7 +114,7 @@ def imu_fill(time_dict, imu_time, imu_ang, log, time_new, time_nmea,
         log.clear()
 
 
-def t_dict(nmea_file, imu_file, near_time_NMEA, near_time_IMU, median_time):
+def t_dict(nmea_file, imu_file, near_time_NMEA = 45, near_time_IMU = 0.2, median_time = 2):
 
     base = os.path.splitext(nmea_file)[0]
     os.rename(nmea_file, base + ".csv")
